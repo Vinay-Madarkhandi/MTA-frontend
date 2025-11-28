@@ -1,5 +1,5 @@
 // Mock data for demo mode
-export const DEMO_MODE = false; // Set to false when backend is ready
+export const DEMO_MODE = true; // Set to false when backend is ready
 
 export const mockUser = {
   id: 1,

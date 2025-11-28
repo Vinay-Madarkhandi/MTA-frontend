@@ -102,3 +102,84 @@ export interface DashboardStats {
   paidCount: number;
   cancelledCount: number;
 }
+
+// Purchase Module Types
+export interface PurchaseItem {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  taxAmount: number;
+  discountPercent: number;
+  discountAmount: number;
+  total: number;
+}
+
+export interface Purchase {
+  id: string;
+  purchaseNumber: string;
+  supplierName: string;
+  supplierContact: string;
+  supplierEmail: string;
+  supplierGST: string;
+  supplierAddress: string;
+  purchaseDate: string;
+  items: PurchaseItem[];
+  subtotal: number;
+  totalTax: number;
+  totalDiscount: number;
+  shippingCharges: number;
+  otherCharges: number;
+  grandTotal: number;
+  paymentStatus: "pending" | "partial" | "paid";
+  paymentMethod: "cash" | "card" | "upi" | "netbanking" | "pos";
+  transactionId?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PurchaseCommand {
+  supplierName: string;
+  supplierContact: string;
+  supplierEmail: string;
+  supplierGST: string;
+  supplierAddress: string;
+  purchaseDate: string;
+  items: PurchaseItem[];
+  subtotal: number;
+  totalTax: number;
+  totalDiscount: number;
+  shippingCharges: number;
+  otherCharges: number;
+  grandTotal: number;
+  paymentStatus: "pending" | "partial" | "paid";
+  paymentMethod: "cash" | "card" | "upi" | "netbanking" | "pos";
+  transactionId?: string;
+  notes?: string;
+}
+
+export interface PurchaseStats {
+  totalPurchases: number;
+  pendingPayments: number;
+  completedToday: number;
+  totalAmount: number;
+}
+
+export interface PaymentRequest {
+  purchaseId: string;
+  amount: number;
+  paymentMethod: "cash" | "card" | "upi" | "netbanking" | "pos";
+  transactionId?: string;
+  notes?: string;
+}
+
+export interface PaymentResponse {
+  success: boolean;
+  transactionId: string;
+  paymentStatus: "pending" | "partial" | "paid";
+  message: string;
+  timestamp: string;
+}

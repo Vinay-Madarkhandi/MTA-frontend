@@ -13,18 +13,26 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  ChevronDown,
+  ChevronRight,
+  ShoppingCart,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [isInventoryOpen, setIsInventoryOpen] = useState(true);
 
   const platformItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/products", icon: Package, label: "Inventory" },
     { href: "/sales", icon: TrendingUp, label: "Sales" },
     { href: "/orders", icon: ClipboardList, label: "Orders" },
+  ];
+
+  const inventorySubItems = [
+    { href: "/products", icon: ShoppingCart, label: "Purchase" },
   ];
 
   const managementItems = [
@@ -80,6 +88,54 @@ export default function Sidebar() {
                 </Link>
               );
             })}
+
+            {/* Inventory with Submenu */}
+            <div>
+              <button
+                onClick={() => setIsInventoryOpen(!isInventoryOpen)}
+                className={cn(
+                  "w-full flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname.startsWith("/products")
+                    ? "bg-secondary text-secondary-foreground"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-secondary-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Package className="h-4 w-4" />
+                  <span>Inventory</span>
+                </div>
+                {isInventoryOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+
+              {/* Inventory Submenu */}
+              {isInventoryOpen && (
+                <div className="ml-6 mt-1 space-y-1 border-l border-border pl-3">
+                  {inventorySubItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-secondary text-secondary-foreground"
+                            : "text-muted-foreground hover:bg-secondary/50 hover:text-secondary-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
