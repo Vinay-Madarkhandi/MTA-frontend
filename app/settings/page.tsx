@@ -122,7 +122,7 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                (
+                
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="current">Current Password</Label>
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                (
+                
                 {[
                   {
                     label: "Low stock alerts",
@@ -196,7 +196,7 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                (
+                
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="currency">Currency</Label>
