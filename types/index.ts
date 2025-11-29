@@ -64,8 +64,8 @@ export interface Product {
   imageUrl?: string;
   active: boolean;
   reorderLevel?: number; // present in second file
-  lowStockThreshold?: number; // alias for reorderLevel (kept)
-  minimumQuantity?: number;
+  lowStockThreshold: number; // alias for reorderLevel (kept)
+  minimumQuantity: number;
   totalValue?: number;
   stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
   expiryDate?: string;

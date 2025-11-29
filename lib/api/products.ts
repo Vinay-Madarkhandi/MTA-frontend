@@ -10,7 +10,11 @@ import { DEMO_MODE, mockApi } from '../mockData';
 export const productApi = {
   getAll: async (): Promise<Product[]> => {
     if (DEMO_MODE) {
-      return mockApi.getProducts();
+      const products = await mockApi.getProducts();
+      return products.map(product => ({
+        ...product,
+        currentStock: product.stock,
+      }));
     }
     const response = await apiClient.get<ApiResponse<Product[]>>('/products');
     return response.data.data;
@@ -20,7 +24,7 @@ export const productApi = {
     if (DEMO_MODE) {
       const product = await mockApi.getProductById(id);
       if (!product) throw new Error('Product not found');
-      return product;
+      return { ...product, currentStock: product.stock };
     }
     const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
     return response.data.data;
@@ -31,7 +35,7 @@ export const productApi = {
       const products = await mockApi.getProducts();
       const product = products.find(p => p.sku === sku);
       if (!product) throw new Error('Product not found');
-      return product;
+      return { ...product, currentStock: product.stock };
     }
     const response = await apiClient.get<ApiResponse<Product>>(`/products/sku/${sku}`);
     return response.data.data;
@@ -47,7 +51,8 @@ export const productApi = {
 
   update: async (id: number, data: ProductCommand): Promise<Product> => {
     if (DEMO_MODE) {
-      return mockApi.updateProduct(id, data);
+      const updatedProduct = await mockApi.updateProduct(id, data);
+      return { ...updatedProduct, currentStock: updatedProduct.stock };
     }
     const response = await apiClient.put<ApiResponse<Product>>(`/products/${id}`, data);
     return response.data.data;
@@ -65,7 +70,8 @@ export const productApi = {
       const product = await mockApi.getProductById(id);
       if (!product) throw new Error('Product not found');
       const newStock = product.stock + data.addStock - data.reduceStock;
-      return mockApi.updateProduct(id, { stock: newStock });
+      const updatedProduct = await mockApi.updateProduct(id, { stock: newStock });
+      return { ...updatedProduct, currentStock: updatedProduct.stock };
     }
     const response = await apiClient.patch<ApiResponse<Product>>(`/products/${id}/stock`, data);
     return response.data.data;

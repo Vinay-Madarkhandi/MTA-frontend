@@ -8,43 +8,50 @@ export const partyApi = {
   // Get all parties
   getAllParties: async (): Promise<Party[]> => {
     if (USE_MOCK) return mockApi.getParties();
-    return apiClient.get<Party[]>('/parties');
+    const response = await apiClient.get<Party[]>('/parties');
+    return response.data;
   },
 
   // Get party by ID
   getPartyById: async (id: number): Promise<Party> => {
-    return apiClient.get<Party>(`/parties/${id}`);
+    const response = await apiClient.get<Party>(`/parties/${id}`);
+    return response.data;
   },
 
   // Get parties by type
   getPartiesByType: async (type: 'CUSTOMER' | 'SUPPLIER'): Promise<Party[]> => {
     if (USE_MOCK) return mockApi.getPartiesByType(type);
-    return apiClient.get<Party[]>(`/parties?type=${type}`);
+    const response = await apiClient.get<Party[]>(`/parties?type=${type}`);
+    return response.data;
   },
 
   // Create new party
   createParty: async (command: PartyCommand): Promise<Party> => {
     if (USE_MOCK) return mockApi.createParty(command);
-    return apiClient.post<Party>('/parties', command);
+    const response = await apiClient.post<Party>('/parties', command);
+    return response.data;
   },
 
   // Update party
   updateParty: async (id: number, command: PartyCommand): Promise<Party> => {
-    return apiClient.put<Party>(`/parties/${id}`, command);
+    const response = await apiClient.put<Party>(`/parties/${id}`, command);
+    return response.data;
   },
 
   // Delete party
   deleteParty: async (id: number): Promise<void> => {
-    return apiClient.delete(`/parties/${id}`);
+     apiClient.delete(`/parties/${id}`);
   },
 
   // Update party balance
   updatePartyBalance: async (id: number, amount: number, type: 'ADD' | 'DEDUCT'): Promise<Party> => {
-    return apiClient.post<Party>(`/parties/${id}/balance`, { amount, type });
+    const response = await apiClient.post<Party>(`/parties/${id}/balance`, { amount, type });
+    return response.data;
   },
 
   // Get party ledger
   getPartyLedger: async (id: number): Promise<any[]> => {
-    return apiClient.get<any[]>(`/parties/${id}/ledger`);
+    const response = await apiClient.get<any[]>(`/parties/${id}/ledger`);
+    return response.data;
   },
 };
