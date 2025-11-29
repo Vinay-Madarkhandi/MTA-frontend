@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   ShoppingCart,
+  CreditCard,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
@@ -27,18 +28,20 @@ export default function Sidebar() {
 
   const platformItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/sales", icon: TrendingUp, label: "Sales" },
+
     { href: "/orders", icon: ClipboardList, label: "Orders" },
   ];
 
   const inventorySubItems = [
     { href: "/products", icon: ShoppingCart, label: "Purchase" },
+    { href: "/sales", icon: TrendingUp, label: "Sales" },
   ];
 
   const managementItems = [
     { href: "/stocks", icon: Warehouse, label: "Stock" },
     { href: "/reports", icon: BarChart3, label: "Reports" },
     { href: "/settings", icon: Settings, label: "Settings" },
+    { href: "/billing", icon: CreditCard, label: "Billing" },
   ];
 
   return (
