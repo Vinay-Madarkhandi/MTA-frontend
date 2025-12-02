@@ -6,40 +6,7 @@ import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import { productApi } from "@/lib/api/products";
 import { orderApi } from "@/lib/api/orders";
-import { InventorySummary, DashboardStats, Order } from "@/types";
-import { DEMO_MODE } from "@/lib/mockData";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DollarSign,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Package,
-  Sparkles,
-  AlertTriangle,
-  Ban,
-  Plus,
-  ShoppingCart,
-  ClipboardList,
-  BarChart3,
-  ArrowRight,
-} from "lucide-react";
+import { InventorySummary, DashboardStats } from "@/types";
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -47,7 +14,6 @@ export default function DashboardPage() {
   const [inventorySummary, setInventorySummary] =
     useState<InventorySummary | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,14 +25,12 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [inventoryData, statsData, ordersData] = await Promise.all([
+        const [inventoryData, statsData] = await Promise.all([
           productApi.getSummary(),
           orderApi.getTodaysStats(),
-          orderApi.getRecent(5),
         ]);
         setInventorySummary(inventoryData);
         setStats(statsData);
-        setRecentOrders(ordersData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -91,404 +55,232 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <div className="space-y-8">
-        {DEMO_MODE && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-            <div className="flex">
-              <div className="shrink-0">
-                <svg
-                  className="h-5 w-5 text-yellow-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  <strong>Demo Mode Active:</strong> Using mock data for
-                  demonstration. All changes are temporary and won't be saved.
-                  Connect backend to use real data.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <header className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+      <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white space-y-8 p-6">
+        <header>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Overview of your business performance
           </p>
         </header>
 
         {/* Sales Overview */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">
-            Sales Overview
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Today's Sales
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Sales Overview</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Today's Sales</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    ₹{stats?.totalSales || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Total revenue today</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  ₹{stats?.totalSales || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Total revenue today
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Paid Orders
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Paid Orders</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {stats?.paidCount || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Successfully completed</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {stats?.paidCount || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Successfully completed
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Pending
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {stats?.pendingCount || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Awaiting processing</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {stats?.pendingCount || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Awaiting processing
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Cancelled
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <XCircle className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Cancelled</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {stats?.cancelledCount || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Orders cancelled</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {stats?.cancelledCount || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Orders cancelled
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Inventory Status */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">
-            Inventory Status
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Products
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <Package className="h-4 w-4 text-muted-foreground" />
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Inventory Status</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Products</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {inventorySummary?.totalProducts || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Items in catalog</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {inventorySummary?.totalProducts || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Items in catalog
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  In Stock
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">In Stock</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {inventorySummary?.inStock || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Available items</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {inventorySummary?.inStock || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Available items
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Low Stock
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Low Stock</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {inventorySummary?.lowStock || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Needs restocking</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {inventorySummary?.lowStock || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Needs restocking
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Out of Stock
-                </CardTitle>
-                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                  <Ban className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Out of Stock</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+                    {inventorySummary?.outOfStock || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Unavailable items</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {inventorySummary?.outOfStock || 0}
+                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-zinc-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Unavailable items
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Quick Actions */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold tracking-tight">
-            Quick Actions
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card
-              className="cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => router.push("/products")}
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button
+              onClick={() => router.push("/stocks")}
+              className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors text-left group"
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-foreground" />
-                  </div>
-                  <CardTitle className="text-base font-semibold">
-                    Add Product
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Create new inventory item
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="cursor-pointer hover:bg-accent transition-colors"
+              <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:bg-gray-300 dark:group-hover:bg-zinc-700 transition-colors">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div className="font-medium text-gray-900 dark:text-white">Add Product</div>
+              <p className="text-xs text-gray-500 mt-1">Create new inventory item</p>
+            </button>
+            <button
               onClick={() => router.push("/sales/new")}
+              className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors text-left group"
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                    <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base font-semibold">
-                    New Sale
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Process a new order
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="cursor-pointer hover:bg-accent transition-colors"
+              <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:bg-gray-300 dark:group-hover:bg-zinc-700 transition-colors">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div className="font-medium text-gray-900 dark:text-white">New Sale</div>
+              <p className="text-xs text-gray-500 mt-1">Process a new order</p>
+            </button>
+            <button
               onClick={() => router.push("/orders")}
+              className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors text-left group"
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                    <ClipboardList className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base font-semibold">
-                    View Orders
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Manage all orders
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="cursor-pointer hover:bg-accent transition-colors"
+              <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:bg-gray-300 dark:group-hover:bg-zinc-700 transition-colors">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div className="font-medium text-gray-900 dark:text-white">View Orders</div>
+              <p className="text-xs text-gray-500 mt-1">Manage all orders</p>
+            </button>
+            <button
               onClick={() => router.push("/reports")}
+              className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg hover:border-gray-300 dark:hover:border-zinc-700 transition-colors text-left group"
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                    <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base font-semibold">
-                    Reports
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">View analytics</p>
-              </CardContent>
-            </Card>
+              <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:bg-gray-300 dark:group-hover:bg-zinc-700 transition-colors">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div className="font-medium text-gray-900 dark:text-white">Reports</div>
+              <p className="text-xs text-gray-500 mt-1">View analytics</p>
+            </button>
           </div>
         </section>
 
         {/* Recent Orders */}
-        <section className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-semibold tracking-tight">
-                    Recent Orders
-                  </CardTitle>
-                  <p className="text-sm text-green-600 mt-1">
-                    +{recentOrders.length} new order
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() => router.push("/orders")}
-                >
-                  Go to Orders Page
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-muted-foreground">ID</TableHead>
-                    <TableHead className="text-muted-foreground">
-                      Item
-                    </TableHead>
-                    <TableHead className="text-muted-foreground">Qty</TableHead>
-                    <TableHead className="text-muted-foreground">
-                      Order Date
-                    </TableHead>
-                    <TableHead className="text-muted-foreground">
-                      Amount
-                    </TableHead>
-                    <TableHead className="text-muted-foreground">
-                      Status
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center py-8 text-muted-foreground"
-                      >
-                        No recent orders found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    recentOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium text-muted-foreground">
-                          {order.orderId}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {order.customer}
-                        </TableCell>
-                        <TableCell>{order.items}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          ₹{order.total.toFixed(2)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              order.status === "paid"
-                                ? "default"
-                                : order.status === "pending"
-                                ? "secondary"
-                                : "outline"
-                            }
-                            className={
-                              order.status === "paid"
-                                ? "bg-green-100 text-green-800 hover:bg-green-100"
-                                : order.status === "pending"
-                                ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                                : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                            }
-                          >
-                            {order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        <section className="bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 rounded-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Orders</h2>
+            <button
+              onClick={() => router.push("/orders")}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2"
+            >
+              Go to Orders Page
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+          <p className="text-sm text-green-400">+5 new order</p>
         </section>
       </div>
     </Layout>

@@ -9,9 +9,9 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-white dark:bg-black">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8">{children}</main>
+      <main className="flex-1 ml-64">{children}</main>
     </div>
   );
 }

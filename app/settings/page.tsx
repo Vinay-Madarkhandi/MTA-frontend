@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -25,6 +26,106 @@ import { User, Lock, Bell, Settings as SettingsIcon } from "lucide-react";
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  
+  // Profile state
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "",
+    phone: "",
+    language: "english",
+  });
+  
+  // Password state
+  const [passwordData, setPasswordData] = useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
+  
+  // Notification settings
+  const [notifications, setNotifications] = useState({
+    lowStock: true,
+    newOrders: true,
+    dailyReports: false,
+    marketing: false,
+  });
+  
+  // Preferences
+  const [preferences, setPreferences] = useState({
+    currency: "inr",
+    dateFormat: "ddmmyyyy",
+    theme: "light",
+  });
+  
+  const handleProfileSave = async () => {
+    setLoading(true);
+    try {
+      // TODO: Connect to backend API
+      // await userApi.updateProfile(profileData);
+      console.log("Saving profile:", profileData);
+      alert("✅ Profile updated successfully!");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      alert("❌ Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handlePasswordChange = async () => {
+    if (passwordData.new !== passwordData.confirm) {
+      alert("❌ New passwords don't match");
+      return;
+    }
+    if (passwordData.new.length < 6) {
+      alert("❌ Password must be at least 6 characters");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      // TODO: Connect to backend API
+      // await userApi.changePassword(passwordData);
+      console.log("Changing password");
+      alert("✅ Password updated successfully!");
+      setPasswordData({ current: "", new: "", confirm: "" });
+    } catch (error) {
+      console.error("Failed to change password:", error);
+      alert("❌ Failed to change password");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleNotificationsSave = async () => {
+    setLoading(true);
+    try {
+      // TODO: Connect to backend API
+      // await userApi.updateNotifications(notifications);
+      console.log("Saving notifications:", notifications);
+      alert("✅ Notification preferences saved!");
+    } catch (error) {
+      console.error("Failed to save notifications:", error);
+      alert("❌ Failed to save notifications");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handlePreferencesSave = async () => {
+    setLoading(true);
+    try {
+      // TODO: Connect to backend API and update localStorage
+      localStorage.setItem("preferences", JSON.stringify(preferences));
+      console.log("Saving preferences:", preferences);
+      alert("✅ Preferences saved!");
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+      alert("❌ Failed to save preferences");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Layout>
@@ -74,7 +175,14 @@ export default function SettingsPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" type="text" defaultValue={user?.name} />
+                    <Input
+                      id="name"
+                      type="text"
+                      value={profileData.name}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, name: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -91,11 +199,20 @@ export default function SettingsPage() {
                       id="phone"
                       type="tel"
                       placeholder="+91 99999 88888"
+                      value={profileData.phone}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, phone: e.target.value })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="language">Language</Label>
-                    <Select defaultValue="english">
+                    <Select
+                      value={profileData.language}
+                      onValueChange={(value) =>
+                        setProfileData({ ...profileData, language: value })
+                      }
+                    >
                       <SelectTrigger id="language">
                         <SelectValue />
                       </SelectTrigger>
@@ -107,7 +224,9 @@ export default function SettingsPage() {
                     </Select>
                   </div>
                 </div>
-                <Button>Save Changes</Button>
+                <Button onClick={handleProfileSave} disabled={loading}>
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -124,18 +243,41 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="current">Current Password</Label>
-                    <Input id="current" type="password" />
+                    <Input
+                      id="current"
+                      type="password"
+                      value={passwordData.current}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, current: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="new">New Password</Label>
-                    <Input id="new" type="password" />
+                    <Input
+                      id="new"
+                      type="password"
+                      value={passwordData.new}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, new: e.target.value })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm">Confirm New Password</Label>
-                    <Input id="confirm" type="password" />
+                    <Input
+                      id="confirm"
+                      type="password"
+                      value={passwordData.confirm}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirm: e.target.value })
+                      }
+                    />
                   </div>
                 </div>
-                <Button>Update Password</Button>
+                <Button onClick={handlePasswordChange} disabled={loading}>
+                  {loading ? "Updating..." : "Update Password"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -151,24 +293,28 @@ export default function SettingsPage() {
               <CardContent className="space-y-4">
                 {[
                   {
+                    key: "lowStock",
                     label: "Low stock alerts",
                     desc: "Get notified when products run low",
                   },
                   {
+                    key: "newOrders",
                     label: "New orders",
                     desc: "Notifications for new customer orders",
                   },
                   {
+                    key: "dailyReports",
                     label: "Daily reports",
                     desc: "Receive end-of-day summary reports",
                   },
                   {
+                    key: "marketing",
                     label: "Marketing updates",
                     desc: "Product updates and new features",
                   },
-                ].map((item, idx) => (
+                ].map((item) => (
                   <div
-                    key={idx}
+                    key={item.key}
                     className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="space-y-0.5">
@@ -177,9 +323,20 @@ export default function SettingsPage() {
                         {item.desc}
                       </p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={notifications[item.key as keyof typeof notifications]}
+                      onCheckedChange={(checked) =>
+                        setNotifications({
+                          ...notifications,
+                          [item.key]: checked,
+                        })
+                      }
+                    />
                   </div>
                 ))}
+                <Button onClick={handleNotificationsSave} disabled={loading}>
+                  {loading ? "Saving..." : "Save Preferences"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -196,7 +353,12 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="currency">Currency</Label>
-                    <Select defaultValue="inr">
+                    <Select
+                      value={preferences.currency}
+                      onValueChange={(value) =>
+                        setPreferences({ ...preferences, currency: value })
+                      }
+                    >
                       <SelectTrigger id="currency">
                         <SelectValue />
                       </SelectTrigger>
@@ -209,7 +371,12 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="dateFormat">Date Format</Label>
-                    <Select defaultValue="ddmmyyyy">
+                    <Select
+                      value={preferences.dateFormat}
+                      onValueChange={(value) =>
+                        setPreferences({ ...preferences, dateFormat: value })
+                      }
+                    >
                       <SelectTrigger id="dateFormat">
                         <SelectValue />
                       </SelectTrigger>
@@ -222,7 +389,12 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
-                    <Select defaultValue="light">
+                    <Select
+                      value={preferences.theme}
+                      onValueChange={(value) =>
+                        setPreferences({ ...preferences, theme: value })
+                      }
+                    >
                       <SelectTrigger id="theme">
                         <SelectValue />
                       </SelectTrigger>
@@ -234,7 +406,9 @@ export default function SettingsPage() {
                     </Select>
                   </div>
                 </div>
-                <Button>Save Preferences</Button>
+                <Button onClick={handlePreferencesSave} disabled={loading}>
+                  {loading ? "Saving..." : "Save Preferences"}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
