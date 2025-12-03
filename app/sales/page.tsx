@@ -15,8 +15,16 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Plus, X } from "lucide-react";
 import { salesApi } from "@/lib/api/sales";
-import { Product, Party } from "@/types";
+import { Product, Party, ReceiptDetails } from "@/types";
 import { SaleReceipt } from "./components/SaleReceipt";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SaleItem {
   id: string;
@@ -70,8 +78,6 @@ export default function SalesPage() {
   const [focusedField, setFocusedField] = useState<'product' | 'quantity' | null>('product');
   
   const [narration, setNarration] = useState("");
-  const [paymentMode, setPaymentMode] = useState<'CASH' | 'CARD' | 'UPI' | 'CREDIT' | 'BANK_TRANSFER'>('CASH');
-  const [paymentStatus, setPaymentStatus] = useState<'PAID' | 'UNPAID' | 'PARTIAL'>('PAID');
   
   // Add party dialog
   const [showAddParty, setShowAddParty] = useState(false);
@@ -85,6 +91,14 @@ export default function SalesPage() {
   // Receipt state
   const [showReceipt, setShowReceipt] = useState(false);
   const [completedSale, setCompletedSale] = useState<any>(null);
+  
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [receiptPaymentMethod, setReceiptPaymentMethod] = useState<string>("CASH");
+  const [amountReceived, setAmountReceived] = useState<string>("");
+  const [receiptReferenceNo, setReceiptReferenceNo] = useState("");
+  const [receiptNarration, setReceiptNarration] = useState("");
+  const [receiptDueDate, setReceiptDueDate] = useState("");
   
   // Refs
   const partyInputRef = useRef<HTMLInputElement>(null);
@@ -397,7 +411,7 @@ export default function SalesPage() {
     }
   };
 
-  // Confirm sale
+  // Confirm sale - Show payment dialog first
   const handleConfirmSale = async (printReceipt: boolean = false) => {
     const validItems = items.filter(item => item.productId > 0 && item.quantity > 0);
     
@@ -410,7 +424,23 @@ export default function SalesPage() {
       return;
     }
 
+    // Show payment dialog before saving
+    const totals = calculateTotals();
+    setAmountReceived(totals.grandTotal.toString());
+    setShowPaymentDialog(true);
+  };
+
+  // Process sale after payment details are confirmed
+  const handleProcessSale = async (printReceipt: boolean = false) => {
+    const validItems = items.filter(item => item.productId > 0 && item.quantity > 0);
+    
+    if (!selectedParty) {
+      alert('Please select a customer');
+      return;
+    }
+    
     setSaving(true);
+    setShowPaymentDialog(false);
     try {
       const totals = calculateTotals();
       
@@ -425,10 +455,14 @@ export default function SalesPage() {
         discountType: 'PERCENTAGE' as const,
         roundOff: 0,
         grandTotal: totals.grandTotal,
-        paymentMode,
-        paymentStatus,
-        paidAmount: paymentStatus === 'PAID' ? totals.grandTotal : 0,
         narration,
+        receiptDetails: {
+          paymentMethod: receiptPaymentMethod,
+          amountReceived: parseFloat(amountReceived) || 0,
+          referenceNo: receiptReferenceNo,
+          narration: receiptNarration,
+          dueDate: receiptDueDate || undefined,
+        },
         items: validItems.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -476,9 +510,15 @@ export default function SalesPage() {
     setCurrentItemIndex(0);
     setProductSearch("");
     setNarration("");
-    setPaymentMode('CASH');
-    setPaymentStatus('PAID');
     setInvoiceNumber("");
+    
+    // Reset payment dialog fields
+    setReceiptPaymentMethod("CASH");
+    setAmountReceived("");
+    setReceiptReferenceNo("");
+    setReceiptNarration("");
+    setReceiptDueDate("");
+    
     loadData(); // Reload to get new voucher number
   };
 
@@ -803,35 +843,6 @@ export default function SalesPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-gray-600 dark:text-gray-400 text-sm">Payment Mode</Label>
-              <select
-                value={paymentMode}
-                onChange={(e: any) => setPaymentMode(e.target.value)}
-                className="mt-1 w-full bg-white dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white"
-              >
-                <option value="CASH">Cash</option>
-                <option value="CARD">Card</option>
-                <option value="UPI">UPI</option>
-                <option value="BANK_TRANSFER">Bank Transfer</option>
-                <option value="CREDIT">Credit</option>
-              </select>
-            </div>
-            <div>
-              <Label className="text-gray-600 dark:text-gray-400 text-sm">Payment Status</Label>
-              <select
-                value={paymentStatus}
-                onChange={(e: any) => setPaymentStatus(e.target.value)}
-                className="mt-1 w-full bg-white dark:bg-[#0a0a0a] border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-gray-900 dark:text-white"
-              >
-                <option value="PAID">Paid</option>
-                <option value="UNPAID">Unpaid</option>
-                <option value="PARTIAL">Partial</option>
-              </select>
-            </div>
-          </div>
-
           {/* Action Buttons */}
           <div className="flex gap-4 mt-6">
             <Button
@@ -923,6 +934,122 @@ export default function SalesPage() {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Add Party
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="max-w-2xl bg-white dark:bg-[#1a1a1a] border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white">
+            <DialogHeader>
+              <DialogTitle>Receipt Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Total Amount:</span>
+                  <span className="text-xl font-bold">₹{totals.grandTotal.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-gray-600 dark:text-gray-400 text-sm">Payment Method *</Label>
+                <Select value={receiptPaymentMethod} onValueChange={setReceiptPaymentMethod}>
+                  <SelectTrigger className="mt-1 bg-white dark:bg-[#0a0a0a] border-gray-300 dark:border-gray-700">
+                    <SelectValue placeholder="Select payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="AEPS">AEPS</SelectItem>
+                    <SelectItem value="UPI">UPI</SelectItem>
+                    <SelectItem value="WALLET">Wallet</SelectItem>
+                    <SelectItem value="BANK">Bank Transfer</SelectItem>
+                    <SelectItem value="CREDIT">On Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-gray-600 dark:text-gray-400 text-sm">Amount Received *</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={amountReceived}
+                  onChange={(e) => setAmountReceived(e.target.value)}
+                  placeholder="Enter amount received..."
+                  className="mt-1 bg-white dark:bg-[#0a0a0a] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Enter 0 for full credit. Enter partial amount for partial payment.
+                </p>
+              </div>
+
+              {parseFloat(amountReceived) < totals.grandTotal && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Balance Due: ₹{(totals.grandTotal - (parseFloat(amountReceived) || 0)).toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              {(receiptPaymentMethod === "UPI" || receiptPaymentMethod === "BANK" || receiptPaymentMethod === "AEPS") && (
+                <div>
+                  <Label className="text-gray-600 dark:text-gray-400 text-sm">Reference No. (Transaction ID / Cheque No.)</Label>
+                  <Input
+                    value={receiptReferenceNo}
+                    onChange={(e) => setReceiptReferenceNo(e.target.value)}
+                    placeholder="Enter reference number..."
+                    className="mt-1 bg-white dark:bg-[#0a0a0a] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              )}
+
+              {(parseFloat(amountReceived) < totals.grandTotal || receiptPaymentMethod === "CREDIT") && (
+                <div>
+                  <Label className="text-gray-600 dark:text-gray-400 text-sm">Due Date (Optional)</Label>
+                  <Input
+                    type="date"
+                    value={receiptDueDate}
+                    onChange={(e) => setReceiptDueDate(e.target.value)}
+                    className="mt-1 bg-white dark:bg-[#0a0a0a] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label className="text-gray-600 dark:text-gray-400 text-sm">Narration (Optional)</Label>
+                <Textarea
+                  value={receiptNarration}
+                  onChange={(e) => setReceiptNarration(e.target.value)}
+                  placeholder="Add payment notes..."
+                  rows={3}
+                  className="mt-1 bg-white dark:bg-[#0a0a0a] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPaymentDialog(false)}
+                disabled={saving}
+                className="border-gray-300 dark:border-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => handleProcessSale(false)} 
+                disabled={saving || !amountReceived}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Confirm & Save Sale"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

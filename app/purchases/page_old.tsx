@@ -235,7 +235,6 @@ export default function PurchaseEntryPage() {
         shippingCharges: 0,
         otherCharges: 0,
         grandTotal: totalAmount,
-        paymentStatus: 'pending',
         notes: narration,
         items: validItems.map((item) => ({
           productId: parseInt(item.productId),

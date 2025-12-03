@@ -22,9 +22,6 @@ export interface PurchaseTransaction {
   shippingCharges: number;
   otherCharges: number;
   grandTotal: number;
-  paymentStatus: string;
-  paymentMethod?: string;
-  transactionId?: string;
   notes?: string;
   items: PurchaseItem[];
   createdAt?: string;
@@ -44,6 +41,14 @@ export interface PurchaseItem {
   total: number;
 }
 
+export interface PaymentDetails {
+  paymentMethod: string;
+  amountPaid: number;
+  referenceNo?: string;
+  narration?: string;
+  dueDate?: string;
+}
+
 export interface PurchaseCommand {
   purchaseNumber?: string;
   supplierId?: number;
@@ -59,10 +64,8 @@ export interface PurchaseCommand {
   shippingCharges: number;
   otherCharges: number;
   grandTotal: number;
-  paymentStatus: string;
-  paymentMethod?: string;
-  transactionId?: string;
   notes?: string;
+  paymentDetails?: PaymentDetails;
   items: {
     productId: number;
     productName: string;
@@ -74,6 +77,16 @@ export interface PurchaseCommand {
     discountAmount: number;
     total: number;
   }[];
+}
+
+export interface PurchaseStats {
+  totalPurchases: number;
+  todayPurchases: number;
+  monthPurchases: number;
+  totalTransactions: number;
+  paidTransactions: number;
+  unpaidTransactions: number;
+  totalPayable: number;
 }
 
 export const purchaseApi = {
@@ -118,6 +131,12 @@ export const purchaseApi = {
   // Get purchases by supplier
   getPurchasesBySupplier: async (supplierId: number): Promise<PurchaseTransaction[]> => {
     const response = await apiClient.get<ApiResponse<PurchaseTransaction[]>>(`/purchases/supplier/${supplierId}`);
+    return response.data.data;
+  },
+
+  // Get purchase statistics
+  getPurchaseStats: async (): Promise<PurchaseStats> => {
+    const response = await apiClient.get<ApiResponse<PurchaseStats>>('/purchases/stats');
     return response.data.data;
   },
 };

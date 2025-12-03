@@ -366,6 +366,14 @@ export interface SaleTransaction {
   updatedAt: string;
 }
 
+export interface ReceiptDetails {
+  paymentMethod: string;
+  amountReceived: number;
+  referenceNo?: string;
+  narration?: string;
+  dueDate?: string;
+}
+
 export interface SaleCommand {
   partyId: number;
   items: {
@@ -381,12 +389,9 @@ export interface SaleCommand {
   discountType?: 'AMOUNT' | 'PERCENTAGE';
   roundOff?: number;
   grandTotal: number;
-  paymentMode: 'CASH' | 'CREDIT' | 'CARD' | 'UPI' | 'BANK_TRANSFER';
-  paymentStatus: 'PAID' | 'UNPAID' | 'PARTIAL';
-  paidAmount: number;
   saleDate?: string;
-  dueDate?: string;
   narration?: string;
+  receiptDetails?: ReceiptDetails;
 }
 
 /**

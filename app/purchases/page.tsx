@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { useProducts } from "@/hooks/useProducts";
 import { useParties } from "@/hooks/useParties";
-import { purchaseApi, PurchaseCommand } from "@/lib/api/purchases";
+import { purchaseApi, PurchaseCommand, PaymentDetails } from "@/lib/api/purchases";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PurchaseItem {
   id: string;
@@ -71,6 +78,14 @@ export default function PurchaseEntryPage() {
   const [selectedPartyIndex, setSelectedPartyIndex] = useState(0);
   const [selectedProductIndexes, setSelectedProductIndexes] = useState<{ [key: string]: number }>({});
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  
+  // Payment dialog state
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<string>("CASH");
+  const [amountPaid, setAmountPaid] = useState<string>("");
+  const [referenceNo, setReferenceNo] = useState("");
+  const [paymentNarration, setPaymentNarration] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
   // ==================== NEW PARTY FORM ====================
   const [newParty, setNewParty] = useState({
@@ -336,7 +351,22 @@ export default function PurchaseEntryPage() {
       return;
     }
 
+    // Show payment dialog before saving
+    setAmountPaid(totalAmount.toString());
+    setShowPaymentDialog(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    const supplier = parties.find((p) => p.name === partyName);
+    if (!supplier) {
+      alert("Supplier not found.");
+      return;
+    }
+
+    const validItems = items.filter((item) => item.productName && item.qty > 0);
+    
     setIsSubmitting(true);
+    setShowPaymentDialog(false);
 
     try {
       const purchaseCommand: PurchaseCommand = {
@@ -356,8 +386,14 @@ export default function PurchaseEntryPage() {
         shippingCharges: 0,
         otherCharges: 0,
         grandTotal: totalAmount,
-        paymentStatus: 'pending',
         notes: narration,
+        paymentDetails: {
+          paymentMethod: paymentMethod,
+          amountPaid: parseFloat(amountPaid) || 0,
+          referenceNo: referenceNo,
+          narration: paymentNarration,
+          dueDate: dueDate || undefined,
+        },
         items: validItems.map((item) => ({
           productId: parseInt(item.productId),
           productName: item.productName,
@@ -394,6 +430,13 @@ export default function PurchaseEntryPage() {
       ]);
       setPartySearchQuery("");
       setProductSearchQueries({});
+      
+      // Reset payment fields
+      setPaymentMethod("CASH");
+      setAmountPaid("");
+      setReferenceNo("");
+      setPaymentNarration("");
+      setDueDate("");
 
       // Refresh products to get updated stock
       await fetchProducts();
@@ -797,6 +840,120 @@ export default function PurchaseEntryPage() {
               </Button>
               <Button onClick={handleAddParty} disabled={!newParty.name.trim()}>
                 Add Party
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Method Dialog */}
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Payment Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="bg-muted p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Total Amount:</span>
+                  <span className="text-xl font-bold">₹{totalAmount.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label>Payment Method *</Label>
+                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CASH">Cash</SelectItem>
+                    <SelectItem value="AEPS">AEPS</SelectItem>
+                    <SelectItem value="UPI">UPI</SelectItem>
+                    <SelectItem value="WALLET">Wallet</SelectItem>
+                    <SelectItem value="BANK">Bank Transfer</SelectItem>
+                    <SelectItem value="CREDIT">On Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Amount Paid *</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(e.target.value)}
+                  placeholder="Enter amount paid..."
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter 0 for full credit. Enter partial amount for partial payment.
+                </p>
+              </div>
+
+              {parseFloat(amountPaid) < totalAmount && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Due Amount: ₹{(totalAmount - (parseFloat(amountPaid) || 0)).toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              {(paymentMethod === "UPI" || paymentMethod === "BANK" || paymentMethod === "AEPS") && (
+                <div>
+                  <Label>Reference No. (Transaction ID / Cheque No.)</Label>
+                  <Input
+                    value={referenceNo}
+                    onChange={(e) => setReferenceNo(e.target.value)}
+                    placeholder="Enter reference number..."
+                    className="mt-1"
+                  />
+                </div>
+              )}
+
+              {(parseFloat(amountPaid) < totalAmount || paymentMethod === "CREDIT") && (
+                <div>
+                  <Label>Due Date (Optional)</Label>
+                  <Input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+
+              <div>
+                <Label>Narration (Optional)</Label>
+                <Textarea
+                  value={paymentNarration}
+                  onChange={(e) => setPaymentNarration(e.target.value)}
+                  placeholder="Add payment notes..."
+                  rows={3}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPaymentDialog(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleConfirmPayment} 
+                disabled={isSubmitting || !amountPaid}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Confirm & Save Purchase"
+                )}
               </Button>
             </div>
           </DialogContent>

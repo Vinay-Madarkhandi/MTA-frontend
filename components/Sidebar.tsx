@@ -97,13 +97,13 @@ export default function Sidebar() {
               <button
                 onClick={() => setIsInventoryOpen(!isInventoryOpen)}
                 className={cn(
-                  "w-full flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "w-full flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white"
                 )}
               >
                 <div className="flex items-center gap-3">
                   <Package className="h-4 w-4" />
-                  <span>Inventory</span>
+                  <span>Voucher</span>
                 </div>
                 {isInventoryOpen ? (
                   <ChevronDown className="h-4 w-4" />
