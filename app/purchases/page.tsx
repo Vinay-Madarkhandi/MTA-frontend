@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import {
@@ -895,6 +896,26 @@ export default function PurchaseEntryPage() {
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                     Due Amount: ₹{(totalAmount - (parseFloat(amountPaid) || 0)).toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              {paymentMethod === "UPI" && parseFloat(amountPaid) > 0 && (
+                <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-3">Scan QR Code to Pay</Label>
+                  <div className="bg-white p-3 rounded-lg">
+                    <QRCodeSVG 
+                      value={`upi://pay?pa=8856094992@jupiteraxis&pn=MTA&am=${parseFloat(amountPaid) || 0}&cu=INR`}
+                      size={160}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                    Amount: ₹{parseFloat(amountPaid).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    8856094992@jupiteraxis
                   </p>
                 </div>
               )}

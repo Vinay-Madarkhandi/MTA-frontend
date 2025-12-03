@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Loader2, Plus, X } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { salesApi } from "@/lib/api/sales";
 import { Product, Party, ReceiptDetails } from "@/types";
 import { SaleReceipt } from "./components/SaleReceipt";
@@ -989,6 +990,26 @@ export default function SalesPage() {
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                     Balance Due: ₹{(totals.grandTotal - (parseFloat(amountReceived) || 0)).toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              {receiptPaymentMethod === "UPI" && parseFloat(amountReceived) > 0 && (
+                <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-3">Scan QR Code to Pay</Label>
+                  <div className="bg-white p-3 rounded-lg">
+                    <QRCodeSVG 
+                      value={`upi://pay?pa=8856094992@jupiteraxis&pn=MTA&am=${parseFloat(amountReceived) || 0}&cu=INR`}
+                      size={160}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                    Amount: ₹{parseFloat(amountReceived).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    8856094992@jupiteraxis
                   </p>
                 </div>
               )}
