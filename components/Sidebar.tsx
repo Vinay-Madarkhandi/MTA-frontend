@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ShoppingCart,
   CreditCard,
+  Receipt,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
@@ -35,6 +36,7 @@ export default function Sidebar() {
   const inventorySubItems = [
     { href: "/purchases", icon: ShoppingCart, label: "Purchase" },
     { href: "/sales", icon: TrendingUp, label: "Sales" },
+    { href: "/receipts", icon: Receipt, label: "Receipt" },
   ];
 
   const managementItems = [
