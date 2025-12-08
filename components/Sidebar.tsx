@@ -37,6 +37,7 @@ export default function Sidebar() {
     { href: "/purchases", icon: ShoppingCart, label: "Purchase" },
     { href: "/sales", icon: TrendingUp, label: "Sales" },
     { href: "/receipts", icon: Receipt, label: "Receipt" },
+    { href: "/payments", icon: CreditCard, label: "Payment" },
   ];
 
   const managementItems = [
@@ -52,15 +53,15 @@ export default function Sidebar() {
       <div className="flex h-14 items-center justify-between px-4 border-b border-gray-200 dark:border-zinc-800">
         <Link href="/dashboard" className="flex items-center gap-2 group">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 dark:bg-zinc-800 group-hover:bg-blue-700 dark:group-hover:bg-zinc-700 transition-colors">
-            <span className="text-base font-bold text-white">
-              S
-            </span>
+            <span className="text-base font-bold text-white">S</span>
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-none text-gray-900 dark:text-white">
               Shreeshai
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Enterprise</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Enterprise
+            </span>
           </div>
         </Link>
         <ThemeToggle />
