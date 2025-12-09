@@ -19,6 +19,7 @@ import {
   CreditCard,
   Receipt,
   RotateCcw,
+  Undo2,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
@@ -38,6 +39,7 @@ export default function Sidebar() {
     { href: "/purchases", icon: ShoppingCart, label: "Purchase" },
     { href: "/purchase-returns", icon: RotateCcw, label: "Purchase Return" },
     { href: "/sales", icon: TrendingUp, label: "Sales" },
+    { href: "/sales-returns", icon: Undo2, label: "Sales Return" },
     { href: "/receipts", icon: Receipt, label: "Receipt" },
     { href: "/payments", icon: CreditCard, label: "Payment" },
   ];
