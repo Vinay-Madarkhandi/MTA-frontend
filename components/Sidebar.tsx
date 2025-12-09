@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   CreditCard,
   Receipt,
+  RotateCcw,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useState } from "react";
@@ -35,6 +36,7 @@ export default function Sidebar() {
 
   const inventorySubItems = [
     { href: "/purchases", icon: ShoppingCart, label: "Purchase" },
+    { href: "/purchase-returns", icon: RotateCcw, label: "Purchase Return" },
     { href: "/sales", icon: TrendingUp, label: "Sales" },
     { href: "/receipts", icon: Receipt, label: "Receipt" },
     { href: "/payments", icon: CreditCard, label: "Payment" },
